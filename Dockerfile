@@ -1,5 +1,8 @@
+FROM gradle:jdk11 as build
+COPY --chown=gradle:gradle . /home/gradle/src
+WORKDIR /home/gradle/src
+RUN gradle build
+
 FROM openjdk:11.0.9.1-jdk
-RUN gradlew bootJar
-ARG JAR_FILE=build/libs/demo-0.0.1-SNAPSHOT.jar
-COPY ${JAR_FILE} app.jar
+COPY --from=build /home/gradle/src/build/libs/*.jar /app.jar
 ENTRYPOINT ["java","-jar","/app.jar"]
