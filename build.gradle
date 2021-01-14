@@ -2,7 +2,10 @@ plugins {
 	id 'org.springframework.boot' version '2.4.1'
 	id 'io.spring.dependency-management' version '1.0.10.RELEASE'
 	id 'java'
+	id "com.github.node-gradle.node" version "2.2.4"
 }
+
+apply plugin: 'com.github.node-gradle.node'
 
 group = 'com.vc'
 version = '0.0.1-SNAPSHOT'
@@ -10,6 +13,13 @@ sourceCompatibility = '11'
 
 repositories {
 	mavenCentral()
+}
+
+node {
+	version='12.18.1'
+	npmVersion='6.14.5'
+	download=true
+	nodeModulesDir=file("$projectDir/src/main/webapp")
 }
 
 dependencies {
@@ -22,3 +32,13 @@ dependencies {
 test {
 	useJUnitPlatform()
 }
+
+task copyWeb(type: Copy) {
+	dependsOn 'yarn_build'
+	from "$projectDir/src/main/webapp/build"
+	into "$projectDir/src/main/resources/static/"
+}
+
+processResources.dependsOn 'copyWeb'
+clean.delete <<file('node_modules')
+clean.delete <<file('./src/main/resources/static/react-app.js')
